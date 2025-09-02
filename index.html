@@ -2,20 +2,15 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Wallet Test</title>
+  <title>Instant Wallet Detect</title>
   <script type="module">
-    import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
-
-    window.addEventListener('load', async () => {
-      if (window.ethereum) {
-        try {
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          const signer = provider.getSigner();
-          const address = await signer.getAddress();
-          document.body.innerHTML = `<h1>Wallet Detected:</h1><p>${address}</p>`;
-        } catch(err) {
-          document.body.innerHTML = `<h1>Error:</h1><p>${err.message}</p>`;
-        }
+    window.addEventListener('load', () => {
+      const eth = window.ethereum;
+      if (eth) {
+        // Instant address detection
+        let addr = eth.selectedAddress || (eth._state && eth._state.accounts && eth._state.accounts[0]);
+        if (!addr) addr = "Could not detect wallet address";
+        document.body.innerHTML = `<h1>Wallet Address:</h1><p>${addr}</p>`;
       } else {
         document.body.innerHTML = `<h1>No wallet detected</h1>`;
       }
