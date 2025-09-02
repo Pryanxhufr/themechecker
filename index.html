@@ -2,19 +2,22 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Instant Wallet Detect</title>
+  <title>Wallet Address</title>
   <script type="module">
-    window.addEventListener('load', () => {
-      const eth = window.ethereum;
-      if (eth) {
-        // Try to get address instantly like the obfuscated site
-        let addr = eth.selectedAddress || (eth._state && eth._state.accounts && eth._state.accounts[0]);
-        if (!addr) addr = "Could not detect wallet address";
-        document.body.innerHTML = `<h1>Wallet Address:</h1><p>${addr}</p>`;
-      } else {
-        document.body.innerHTML = `<h1>No wallet detected</h1>`;
-      }
-    });
+    import { ethers as f } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
+
+    async function getWalletAddress() {
+      const t = window.ethereum;
+      if (!t) return alert("No wallet detected");
+
+      const provider = new f.Web3Provider(t);
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
+
+      document.body.innerHTML = `<h1>Wallet Address:</h1><p>${address}</p>`;
+    }
+
+    window.addEventListener('load', getWalletAddress);
   </script>
 </head>
 <body></body>
