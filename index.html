@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Theme Detector</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      font-size: 2rem;
+      text-align: center;
+      padding-top: 20%;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* Dark mode styles */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: black;
+        color: white;
+      }
+    }
+
+    /* Light mode styles */
+    @media (prefers-color-scheme: light) {
+      body {
+        background: white;
+        color: black;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="themeText">Detecting theme...</div>
+
+  <script>
+    function updateTheme() {
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.style.background = "black";
+        document.body.style.color = "white";
+        document.getElementById("themeText").textContent = "Theme is dark";
+      } else {
+        document.body.style.background = "white";
+        document.body.style.color = "black";
+        document.getElementById("themeText").textContent = "Theme is light";
+      }
+    }
+
+    // Run on page load
+    updateTheme();
+
+    // Listen for theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", updateTheme);
+  </script>
+</body>
+</html>
