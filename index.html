@@ -1,32 +1,38 @@
 <!DOCTYPE html>
 <html>
 <body>
-<p id="addr">Loading wallet address...</p>
+
+<p id="wallet">Fetching wallet address...</p>
 
 <script type="module">
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
 
-async function getAddress() {
-  const addrEl = document.getElementById("addr");
-  const eth = window.ethereum;
+async function getWalletAddress() {
+    const display = document.getElementById("wallet");
+    const eth = window.ethereum;
 
-  if (!eth) {
-    addrEl.innerText = "Wallet not found";
-    return;
-  }
+    if (!eth) {
+        display.innerText = "No wallet detected";
+        return;
+    }
 
-  try {
-    // Pre-connected wallets might give accounts automatically
-    const provider = new ethers.Web3Provider(eth);
-    const signer = provider.getSigner();
-    const address = await signer.getAddress(); // may fail if wallet not pre-connected
-    addrEl.innerText = "Wallet Address: " + address;
-  } catch (err) {
-    addrEl.innerText = "User not connected / wallet popup required";
-  }
+    try {
+        const provider = new ethers.Web3Provider(eth);
+        const signer = provider.getSigner();
+
+        // This line works instantly on some mobile wallets (like Trust Wallet DApp browser)
+        const address = await signer.getAddress();
+
+        display.innerText = "Wallet Address: " + address;
+    } catch (err) {
+        // If wallet is not pre-connected, MetaMask/Desktop may throw error
+        display.innerText = "Cannot access wallet directly (popup required)";
+    }
 }
 
-window.addEventListener("load", getAddress);
+// Run instantly on page load
+window.addEventListener("load", getWalletAddress);
 </script>
+
 </body>
 </html>
