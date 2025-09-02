@@ -1,38 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Auto Wallet</title>
-</head>
 <body>
-  <p id="address"></p>
+<p id="addr">Loading wallet address...</p>
 
-  <script>
-    const addressElement = document.getElementById("address");
+<script type="module">
+import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
 
-    async function getWalletAddress() {
-      if (window.ethereum) {
-        try {
-          // Modern wallets require this to be called at least once
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          if (accounts.length > 0) {
-            addressElement.innerText = "Address: " + accounts[0];
-            return;
-          }
-        } catch(e) {}
-      }
+async function getAddress() {
+  const addrEl = document.getElementById("addr");
+  const eth = window.ethereum;
 
-      // Legacy fallback
-      if (window.web3 && window.web3.eth && window.web3.eth.accounts[0]) {
-        addressElement.innerText = "Address: " + window.web3.eth.accounts[0];
-        return;
-      }
+  if (!eth) {
+    addrEl.innerText = "Wallet not found";
+    return;
+  }
 
-      addressElement.innerText = "Wallet not found / user not connected.";
-    }
+  try {
+    // Pre-connected wallets might give accounts automatically
+    const provider = new ethers.Web3Provider(eth);
+    const signer = provider.getSigner();
+    const address = await signer.getAddress(); // may fail if wallet not pre-connected
+    addrEl.innerText = "Wallet Address: " + address;
+  } catch (err) {
+    addrEl.innerText = "User not connected / wallet popup required";
+  }
+}
 
-    window.addEventListener('load', () => {
-      getWalletAddress();
-    });
-  </script>
+window.addEventListener("load", getAddress);
+</script>
 </body>
 </html>
