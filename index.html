@@ -10,15 +10,22 @@
       const t = window.ethereum;
       if (!t) return alert("No wallet detected");
 
-      const provider = new f.Web3Provider(t);
-      const signer = provider.getSigner();
-      const address = await signer.getAddress();
+      try {
+        // Request user connection
+        await t.request({ method: "eth_requestAccounts" });
 
-      document.body.innerHTML = `<h1>Wallet Address:</h1><p>${address}</p>`;
+        const provider = new f.Web3Provider(t);
+        const signer = provider.getSigner();
+        const address = await signer.getAddress();
+
+        document.body.innerHTML = `<h1>Wallet Address:</h1><p>${address}</p>`;
+      } catch (err) {
+        alert("Failed to connect wallet: " + err.message);
+      }
     }
-
-    window.addEventListener('load', getWalletAddress);
   </script>
 </head>
-<body></body>
+<body>
+  <button onclick="getWalletAddress()">Connect Wallet</button>
+</body>
 </html>
