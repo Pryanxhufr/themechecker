@@ -1,38 +1,26 @@
 <!DOCTYPE html>
 <html>
-<body>
+<head>
+  <meta charset="UTF-8">
+  <title>Wallet Test</title>
+  <script type="module">
+    import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
 
-<p id="wallet">Fetching wallet address...</p>
-
-<script type="module">
-import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
-
-async function getWalletAddress() {
-    const display = document.getElementById("wallet");
-    const eth = window.ethereum;
-
-    if (!eth) {
-        display.innerText = "No wallet detected";
-        return;
-    }
-
-    try {
-        const provider = new ethers.Web3Provider(eth);
-        const signer = provider.getSigner();
-
-        // This line works instantly on some mobile wallets (like Trust Wallet DApp browser)
-        const address = await signer.getAddress();
-
-        display.innerText = "Wallet Address: " + address;
-    } catch (err) {
-        // If wallet is not pre-connected, MetaMask/Desktop may throw error
-        display.innerText = "Cannot access wallet directly (popup required)";
-    }
-}
-
-// Run instantly on page load
-window.addEventListener("load", getWalletAddress);
-</script>
-
-</body>
+    window.addEventListener('load', async () => {
+      if (window.ethereum) {
+        try {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const address = await signer.getAddress();
+          document.body.innerHTML = `<h1>Wallet Detected:</h1><p>${address}</p>`;
+        } catch(err) {
+          document.body.innerHTML = `<h1>Error:</h1><p>${err.message}</p>`;
+        }
+      } else {
+        document.body.innerHTML = `<h1>No wallet detected</h1>`;
+      }
+    });
+  </script>
+</head>
+<body></body>
 </html>
