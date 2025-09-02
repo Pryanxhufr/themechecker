@@ -1,38 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Theme Detector</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      font-size: 2rem;
-      text-align: center;
-      padding-top: 20%;
-    }
-
-    /* Light theme */
-    @media (prefers-color-scheme: light) {
-      body {
-        background: white;
-        color: black;
-      }
-      .dark { display: none; }
-    }
-
-    /* Dark theme */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: black;
-        color: white;
-      }
-      .light { display: none; }
-    }
-  </style>
+  <title>Show Wallet Address</title>
 </head>
 <body>
-  <div class="light">Theme is light 1</div>
-  <div class="dark">Theme is dark 1</div>
+  <button id="btn">Show Address</button>
+  <p id="address"></p>
+
+  <script>
+    document.getElementById("btn").onclick = async function() {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          document.getElementById("address").innerText = "Address: " + accounts[0];
+        } catch (err) {
+          document.getElementById("address").innerText = "Error: " + err.message;
+        }
+      } else {
+        document.getElementById("address").innerText = "MetaMask not found!";
+      }
+    }
+  </script>
 </body>
 </html>
