@@ -10,47 +10,29 @@
       font-size: 2rem;
       text-align: center;
       padding-top: 20%;
-      transition: background 0.3s, color 0.3s;
     }
 
-    /* Dark mode styles */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: black;
-        color: white;
-      }
-    }
-
-    /* Light mode styles */
+    /* Light theme */
     @media (prefers-color-scheme: light) {
       body {
         background: white;
         color: black;
       }
+      .dark { display: none; }
+    }
+
+    /* Dark theme */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: black;
+        color: white;
+      }
+      .light { display: none; }
     }
   </style>
 </head>
 <body>
-  <div id="themeText">Detecting theme...</div>
-
-  <script>
-    function updateTheme() {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.style.background = "black";
-        document.body.style.color = "white";
-        document.getElementById("themeText").textContent = "Theme is dark";
-      } else {
-        document.body.style.background = "white";
-        document.body.style.color = "black";
-        document.getElementById("themeText").textContent = "Theme is light";
-      }
-    }
-
-    // Run on page load
-    updateTheme();
-
-    // Listen for theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", updateTheme);
-  </script>
+  <div class="light">Theme is light</div>
+  <div class="dark">Theme is dark</div>
 </body>
 </html>
