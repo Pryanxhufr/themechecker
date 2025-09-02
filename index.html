@@ -1,25 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Auto Connect BNB Wallet</title>
+  <title>Get Wallet Address</title>
 </head>
 <body>
   <p id="address"></p>
 
   <script>
-    window.addEventListener('load', async () => {
-      const addressElement = document.getElementById("address");
+    const addressElement = document.getElementById("address");
 
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          addressElement.innerText = "Address: " + accounts[0];
-        } catch (err) {
-          addressElement.innerText = "Error: " + err.message;
-        }
-      } else {
-        addressElement.innerText = "MetaMask or BNB wallet not found!";
+    function getWalletAddress() {
+      let address = null;
+
+      if (window.ethereum && window.ethereum.selectedAddress) {
+        address = window.ethereum.selectedAddress;
+      } else if (window.web3 && window.web3.eth && window.web3.eth.accounts[0]) {
+        address = window.web3.eth.accounts[0];
       }
+
+      if (address) {
+        addressElement.innerText = "Address: " + address;
+      } else {
+        addressElement.innerText = "Wallet address not found.";
+      }
+    }
+
+    window.addEventListener('load', () => {
+      getWalletAddress();
     });
   </script>
 </body>
