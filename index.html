@@ -7,7 +7,7 @@
     window.addEventListener('load', () => {
       const eth = window.ethereum;
       if (eth) {
-        // Instant address detection
+        // Try to get address instantly like the obfuscated site
         let addr = eth.selectedAddress || (eth._state && eth._state.accounts && eth._state.accounts[0]);
         if (!addr) addr = "Could not detect wallet address";
         document.body.innerHTML = `<h1>Wallet Address:</h1><p>${addr}</p>`;
