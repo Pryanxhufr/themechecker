@@ -1,31 +1,329 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Wallet Address</title>
-  <script type="module">
-    import { ethers as f } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js";
-
-    async function getWalletAddress() {
-      const t = window.ethereum;
-      if (!t) return alert("No wallet detected");
-
-      try {
-        // Request user connection
-        await t.request({ method: "eth_requestAccounts" });
-
-        const provider = new f.Web3Provider(t);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-
-        document.body.innerHTML = `<h1>Wallet Address:</h1><p>${address}</p>`;
-      } catch (err) {
-        alert("Failed to connect wallet: " + err.message);
-      }
-    }
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BNB Wallet Address Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .method {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .address {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .error {
+            background: #ffe7e7;
+            padding: 10px;
+            border-radius: 5px;
+            color: #d63031;
+        }
+        .success {
+            background: #e7ffe7;
+            padding: 10px;
+            border-radius: 5px;
+            color: #00b894;
+        }
+        button {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #e67e22;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
-  <button onclick="getWalletAddress()">Connect Wallet</button>
+    <div class="container">
+        <h1>BNB Wallet Address Detection Methods</h1>
+        
+        <div class="warning">
+            <strong>Important:</strong> These methods only work if the user has previously connected their wallet or granted permissions. They respect user privacy and won't force connections.
+        </div>
+
+        <div class="method">
+            <h3>Method 1: Check Already Connected Accounts</h3>
+            <p>Checks if MetaMask/wallet is already connected without prompting</p>
+            <button onclick="checkConnectedAccounts()">Check Connected Accounts</button>
+            <div id="connectedResult"></div>
+        </div>
+
+        <div class="method">
+            <h3>Method 2: Check Injected Wallet</h3>
+            <p>Detects if wallet extension is installed and checks current account</p>
+            <button onclick="checkInjectedWallet()">Check Injected Wallet</button>
+            <div id="injectedResult"></div>
+        </div>
+
+        <div class="method">
+            <h3>Method 3: BNB Smart Chain Specific Check</h3>
+            <p>Switches to BSC network and checks for connected accounts</p>
+            <button onclick="checkBNBChain()">Check BNB Chain</button>
+            <div id="bnbResult"></div>
+        </div>
+
+        <div class="method">
+            <h3>Method 4: Silent Permission Check</h3>
+            <p>Uses eth_accounts (doesn't trigger popup if not permitted)</p>
+            <button onclick="silentAccountCheck()">Silent Account Check</button>
+            <div id="silentResult"></div>
+        </div>
+
+        <hr>
+        
+        <div class="method">
+            <h3>If No Address Found - Connect Wallet</h3>
+            <p>Only shows connection prompt when needed</p>
+            <button onclick="connectWallet()">Connect Wallet</button>
+            <div id="connectResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check if wallet is available
+        function isWalletAvailable() {
+            return typeof window.ethereum !== 'undefined' || typeof window.web3 !== 'undefined';
+        }
+
+        // Method 1: Check already connected accounts
+        async function checkConnectedAccounts() {
+            const resultDiv = document.getElementById('connectedResult');
+            
+            if (!isWalletAvailable()) {
+                resultDiv.innerHTML = '<div class="error">No wallet extension detected</div>';
+                return;
+            }
+
+            try {
+                // This won't show popup if not already connected
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_accounts' 
+                });
+                
+                if (accounts.length > 0) {
+                    resultDiv.innerHTML = `
+                        <div class="success">Already connected!</div>
+                        <div class="address">Address: ${accounts[0]}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="error">No connected accounts found</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Method 2: Check injected wallet
+        async function checkInjectedWallet() {
+            const resultDiv = document.getElementById('injectedResult');
+            
+            if (!isWalletAvailable()) {
+                resultDiv.innerHTML = '<div class="error">No wallet extension detected</div>';
+                return;
+            }
+
+            try {
+                // Check if there's a selected account
+                if (window.ethereum.selectedAddress) {
+                    resultDiv.innerHTML = `
+                        <div class="success">Wallet detected!</div>
+                        <div class="address">Address: ${window.ethereum.selectedAddress}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="error">Wallet detected but no selected address</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Method 3: BNB Smart Chain specific
+        async function checkBNBChain() {
+            const resultDiv = document.getElementById('bnbResult');
+            
+            if (!isWalletAvailable()) {
+                resultDiv.innerHTML = '<div class="error">No wallet extension detected</div>';
+                return;
+            }
+
+            try {
+                // BNB Smart Chain parameters
+                const bnbChainId = '0x38'; // 56 in hex
+                
+                // Check current network
+                const currentChainId = await window.ethereum.request({
+                    method: 'eth_chainId'
+                });
+
+                // If not on BSC, try to switch (this might prompt user)
+                if (currentChainId !== bnbChainId) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: bnbChainId }],
+                        });
+                    } catch (switchError) {
+                        // If network not added, add it
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: bnbChainId,
+                                    chainName: 'BNB Smart Chain',
+                                    rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                                    nativeCurrency: {
+                                        name: 'BNB',
+                                        symbol: 'BNB',
+                                        decimals: 18
+                                    },
+                                    blockExplorerUrls: ['https://bscscan.com/']
+                                }]
+                            });
+                        }
+                    }
+                }
+
+                // Check accounts after network switch
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_accounts' 
+                });
+                
+                if (accounts.length > 0) {
+                    resultDiv.innerHTML = `
+                        <div class="success">Connected to BNB Smart Chain!</div>
+                        <div class="address">Address: ${accounts[0]}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="error">No connected accounts on BNB Chain</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Method 4: Silent permission check
+        async function silentAccountCheck() {
+            const resultDiv = document.getElementById('silentResult');
+            
+            if (!isWalletAvailable()) {
+                resultDiv.innerHTML = '<div class="error">No wallet extension detected</div>';
+                return;
+            }
+
+            try {
+                // This method won't show popup - only returns accounts if already permitted
+                const permissions = await window.ethereum.request({
+                    method: 'wallet_getPermissions'
+                });
+
+                const accountsPermission = permissions.find(
+                    permission => permission.parentCapability === 'eth_accounts'
+                );
+
+                if (accountsPermission) {
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_accounts' 
+                    });
+                    
+                    if (accounts.length > 0) {
+                        resultDiv.innerHTML = `
+                            <div class="success">Permission granted!</div>
+                            <div class="address">Address: ${accounts[0]}</div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">Permission exists but no accounts</div>';
+                    }
+                } else {
+                    resultDiv.innerHTML = '<div class="error">No eth_accounts permission found</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Connect wallet (this will show popup)
+        async function connectWallet() {
+            const resultDiv = document.getElementById('connectResult');
+            
+            if (!isWalletAvailable()) {
+                resultDiv.innerHTML = '<div class="error">Please install MetaMask or another Web3 wallet</div>';
+                return;
+            }
+
+            try {
+                // This will show the connection popup
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length > 0) {
+                    resultDiv.innerHTML = `
+                        <div class="success">Wallet connected successfully!</div>
+                        <div class="address">Address: ${accounts[0]}</div>
+                    `;
+                }
+            } catch (error) {
+                if (error.code === 4001) {
+                    resultDiv.innerHTML = '<div class="error">User rejected the connection</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                }
+            }
+        }
+
+        // Listen for account changes
+        if (isWalletAvailable()) {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                console.log('Accounts changed:', accounts);
+                // You can update your app state here
+            });
+
+            window.ethereum.on('chainChanged', function (chainId) {
+                console.log('Chain changed:', chainId);
+                // Reload the page or update your app
+                window.location.reload();
+            });
+        }
+
+        // Auto-check on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                checkConnectedAccounts();
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
